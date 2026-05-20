@@ -102,15 +102,6 @@ class TaskHandler(BaseHTTPRequestHandler):
                     print(f"Part {part_number} 完成 "
                           f"({progress['completed']}/{progress['total']})")
 
-                    if self.task_manager.is_all_completed() and self.auto_merge:
-                        print("所有分拆已完成，開始合併...")
-                        merger = Merger(self.output_dir)
-                        try:
-                            result = merger.merge(self.task_path)
-                            print(f"合併完成: {result}")
-                        except Exception as e:
-                            print(f"合併失敗: {e}")
-
                     self._send_json({
                         "status": "completed",
                         "part_number": part_number,
@@ -180,9 +171,21 @@ class DownloadServer:
 
         try:
             print("\n伺服器運行中，按 Ctrl+C 停止...")
-            while True:
-                import time
-                time.sleep(1)
+            import time
+            while not self.task_manager.is_all_completed():
+                time.sleep(2)
+
+            if self.auto_merge:
+                print("所有分拆已完成，開始合併...")
+                merger = Merger(self.output_dir)
+                try:
+                    result = merger.merge(self.task_path)
+                    print(f"合併完成: {result}")
+                except Exception as e:
+                    print(f"合併失敗: {e}")
+
+            print("所有任務已完成，伺服器自動退出...")
+            self._server.shutdown()
         except KeyboardInterrupt:
             print("\n伺服器已停止")
             self._server.shutdown()
