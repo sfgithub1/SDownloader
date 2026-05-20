@@ -8,6 +8,17 @@ from .task import TaskManager
 from .utils import format_bytes
 
 
+def parse_part_numbers(parts_str):
+    if not parts_str:
+        return []
+    result = []
+    for part in parts_str.split(","):
+        part = part.strip()
+        if part.isdigit():
+            result.append(int(part))
+    return result
+
+
 def cmd_create(args):
     tm = TaskManager()
     task_path, file_size, supports_range = tm.create_task(
@@ -31,11 +42,13 @@ def cmd_create(args):
 
 
 def cmd_serve(args):
+    redownload_parts = parse_part_numbers(args.redownload) if args.redownload else []
     server = DownloadServer(
         task_path=args.task,
         output_dir=args.output,
         port=args.port,
         auto_merge=not args.no_auto_merge,
+        redownload_parts=redownload_parts,
     )
     server.start(also_download=not args.no_download)
 
@@ -115,6 +128,9 @@ def main():
     )
     serve_parser.add_argument(
         "--no-auto-merge", action="store_true", help="完成後不自動合併"
+    )
+    serve_parser.add_argument(
+        "--redownload", help="重新下載指定的分拆（逗號分隔，如：1,3,5）"
     )
 
     download_parser = subparsers.add_parser(

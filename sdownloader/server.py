@@ -136,11 +136,12 @@ class TaskHandler(BaseHTTPRequestHandler):
 
 
 class DownloadServer:
-    def __init__(self, task_path, output_dir=".", port=8080, auto_merge=True):
+    def __init__(self, task_path, output_dir=".", port=8080, auto_merge=True, redownload_parts=None):
         self.task_path = task_path
         self.output_dir = output_dir
         self.port = port
         self.auto_merge = auto_merge
+        self.redownload_parts = redownload_parts or []
         self.task_manager = TaskManager()
         self.task_manager.load_task(task_path)
         self._server = None
@@ -151,6 +152,13 @@ class DownloadServer:
         TaskHandler.output_dir = self.output_dir
         TaskHandler.task_path = self.task_path
         TaskHandler.auto_merge = self.auto_merge
+
+        if self.redownload_parts:
+            reset_list = self.task_manager.reset_parts(self.redownload_parts)
+            if reset_list:
+                print(f"已重設分拆: {', '.join(str(p) for p in reset_list)}")
+                if self.task_path:
+                    self.task_manager.save_task(self.task_path)
 
         self._server = HTTPServer(("0.0.0.0", self.port), TaskHandler)
         local_ip = get_local_ip()

@@ -1,8 +1,11 @@
+from pathlib import Path
 from setuptools import setup, find_packages
+
+version = (Path(__file__).parent / "VERSION").read_text().strip()
 
 setup(
     name="sdownloader",
-    version="1.0.0",
+    version=version,
     packages=find_packages(),
     install_requires=[
         "tqdm",

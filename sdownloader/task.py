@@ -123,6 +123,22 @@ class TaskManager:
                     break
             return True
 
+    def reset_parts(self, part_numbers):
+        with self._lock:
+            if not self._task:
+                return []
+
+            reset_list = []
+            for part in self._task["parts"]:
+                if part["part_number"] in part_numbers:
+                    part["status"] = TaskStatus.PENDING
+                    part["checksum"] = None
+                    part["claimed_by"] = None
+                    reset_list.append(part["part_number"])
+
+            self._task["completed_at"] = None
+            return reset_list
+
     def get_pending_count(self):
         with self._lock:
             if not self._task:
