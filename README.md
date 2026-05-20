@@ -102,6 +102,7 @@ sdownloader serve --task <任務檔路徑>
 - `--output`：分拆檔儲存目錄，預設為目前目錄
 - `--no-download`：主機只做協調，不下載分拆
 - `--no-auto-merge`：所有分拆完成後不自動合併
+- `--redownload`：重新下載指定的分拆（逗號分隔，如：1,3,5）
 
 範例：
 ```bash
